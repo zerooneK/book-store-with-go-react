@@ -9,6 +9,7 @@ import sectionIcon from './assets/Icon.png'
 function App() {
   const [books, setBooks] = useState([])
   const [token, setToken] = useState(localStorage.getItem('token') || '')
+  const [role, setRole] = useState(localStorage.getItem('role') || '')
 
   // State สำหรับ Book Form
   const [newBook, setNewBook] = useState({ title: '', author: '', price: 0, image_url: '', stock: 0 })
@@ -37,11 +38,37 @@ function App() {
     }
   }
 
+  // src/App.jsx
 
+  const handleLogin = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await axios.post('http://localhost:3000/login', {
+        email: email,
+        password: password
+      })
+      
+      const receivedToken = response.data.token
+      // 🔴 แก้ไขตรงนี้: รับค่า role จาก backend มาด้วย
+      const receivedRole = response.data.role 
+
+      setToken(receivedToken)
+      setRole(receivedRole) // อัปเดต State
+
+      localStorage.setItem('token', receivedToken)
+      localStorage.setItem('role', receivedRole) // บันทึกลงเครื่อง
+
+      alert("เข้าสู่ระบบสำเร็จ!")
+    } catch (error) {
+      alert("Login พลาด! เช็คอีเมลรหัสผ่านหน่อย")
+    }
+  }
 
   const handleLogout = () => {
     setToken('')
+    setRole('')
     localStorage.removeItem('token')
+    localStorage.removeItem('role')
     Swal.fire({
       icon: 'info',
       title: 'ออกจากระบบแล้ว',
@@ -211,12 +238,13 @@ function App() {
         </div>
 
         <div className="book-grid">
-          {/* ... (BookCard mapping เหมือนเดิม) ... */}
           {books.map((book) => (
             <BookCard
               key={book.ID}
               book={book}
-              isAdmin={!!token}
+              // 🔴 แก้ไขตรงนี้: เปลี่ยนเงื่อนไข isAdmin
+              isAdmin={token && role === 'admin'} 
+              
               onDelete={handleDeleteBook}
               onEdit={handleEditClick}
             />
