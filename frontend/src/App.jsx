@@ -11,7 +11,7 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('token') || '')
 
   // State สำหรับ Book Form
-  const [newBook, setNewBook] = useState({ title: '', author: '', price: 0, image_url: '' })
+  const [newBook, setNewBook] = useState({ title: '', author: '', price: 0, image_url: '', stock: 0 })
 
   // State ควบคุมการเปิด/ปิด Modal
   const [showAddModal, setShowAddModal] = useState(false)
@@ -56,7 +56,8 @@ function App() {
   const openAddModal = () => {
     setIsEditing(false)
     setCurrentBookId(null)
-    setNewBook({ title: '', author: '', price: 0, image_url: '' })
+    // เพิ่ม stock: 0
+    setNewBook({ title: '', author: '', price: 0, image_url: '', stock: 0 }) 
     setShowAddModal(true)
   }
 
@@ -67,11 +68,12 @@ function App() {
       title: book.title,
       author: book.author,
       price: book.price,
-      image_url: book.image_url || ''
+      image_url: book.image_url || '',
+      stock: book.stock || 0 // <--- ดึงค่า stock มาใส่
     })
     setShowAddModal(true)
   }
-
+  
   const handleSaveBook = async (e) => {
     e.preventDefault()
     try {
@@ -176,6 +178,15 @@ function App() {
               <input className="glass-input" placeholder="ชื่อหนังสือ..." value={newBook.title} onChange={e => setNewBook({ ...newBook, title: e.target.value })} required />
               <input className="glass-input" placeholder="ชื่อผู้แต่ง..." value={newBook.author} onChange={e => setNewBook({ ...newBook, author: e.target.value })} required />
               <input className="glass-input" type="number" placeholder="ราคา..." value={newBook.price} onChange={e => setNewBook({ ...newBook, price: parseInt(e.target.value) || 0 })} required />
+              {/* 🔥 เพิ่มช่อง Stock ตรงนี้ */}
+              <input
+                className="glass-input"
+                type="number"
+                placeholder="จำนวนสินค้า (Stock)..."
+                value={newBook.stock}
+                onChange={e => setNewBook({ ...newBook, stock: parseInt(e.target.value) || 0 })}
+                required
+              />
               <input className="glass-input" placeholder="ลิงก์รูปภาพ (URL)..." value={newBook.image_url} onChange={e => setNewBook({ ...newBook, image_url: e.target.value })} />
               <button type="submit" className="btn-primary">
                 {isEditing ? 'บันทึกการแก้ไข' : '✨ ยืนยันเพิ่มหนังสือ'}
