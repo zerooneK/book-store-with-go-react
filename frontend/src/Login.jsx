@@ -20,8 +20,11 @@ function Login({ onLoginSuccess }) {
                 password: password
             })
             const receivedToken = response.data.token
+            const receivedRole = response.data.role
+            const receivedName = response.data.name
             localStorage.setItem('token', receivedToken)
             localStorage.setItem('role', receivedRole)
+            localStorage.setItem('name', receivedName)
 
             // Call parent callback if provided
             if (onLoginSuccess) {
@@ -41,6 +44,7 @@ function Login({ onLoginSuccess }) {
                 navigate('/')
             })
         } catch (error) {
+            console.error("Login Error:", error)
             Swal.fire({
                 icon: 'error',
                 title: 'เข้าสู่ระบบไม่สำเร็จ',
@@ -132,7 +136,11 @@ function Login({ onLoginSuccess }) {
                     <div className="login-divider">or</div>
 
                     {/* Back Link */}
-                    <div className="login-back-link">
+                    <div className="login-back-link" style={{ flexDirection: 'column', gap: '10px' }}> {/* ปรับ Style นิดหน่อยให้วางซ้อนกันสวยๆ */}
+                        <Link to="/register" style={{ color: '#a5b4fc', borderColor: '#a5b4fc' }}>
+                            ยังไม่มีบัญชี? สมัครสมาชิกใหม่
+                        </Link>
+                        
                         <Link to="/">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="19" y1="12" x2="5" y2="12"></line>

@@ -10,6 +10,7 @@ function App() {
   const [books, setBooks] = useState([])
   const [token, setToken] = useState(localStorage.getItem('token') || '')
   const [role, setRole] = useState(localStorage.getItem('role') || '')
+  const [name, setName] = useState(localStorage.getItem('name') || '')
 
   // State สำหรับ Book Form
   const [newBook, setNewBook] = useState({ title: '', author: '', price: 0, image_url: '', stock: 0 })
@@ -40,8 +41,10 @@ function App() {
   const handleLogout = () => {
     setToken('')
     setRole('')
+    setName('')
     localStorage.removeItem('token')
     localStorage.removeItem('role')
+    localStorage.removeItem('name')
     Swal.fire({
       icon: 'info',
       title: 'ออกจากระบบแล้ว',
@@ -145,16 +148,37 @@ function App() {
             </Link>
           ) : (
             <>
-              <div className="admin-badge">
-                <span>👤</span> Admin Mode
-              </div>
-              <button className="add-book-btn" onClick={openAddModal}>
+              {/* --- จุดที่แก้ไข: เช็ค Role เพื่อแสดงป้ายต่างกัน --- */}
+              {role === 'admin' ? (
+                // กรณีเป็น Admin ให้โชว์แบบเดิม
+                <div className="admin-badge">
+                  <span>👮</span> Admin Mode
+                </div>
+              ) : (
+                // กรณีเป็น User ให้โชว์ชื่อ
+                <div className="user-badge" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    background: 'rgba(76, 217, 100, 0.2)', // สีเขียวอ่อนๆ
+                    padding: '8px 15px',
+                    borderRadius: '20px',
+                    border: '1px solid rgba(76, 217, 100, 0.3)',
+                    color: '#86efac',
+                    fontSize: '0.9rem'
+                }}>
+                  <span>🧑‍🚀</span> {name} {/* แสดงชื่อ User ตรงนี้ */}
+                </div>
+              )}
+              {/* ปุ่มเพิ่มหนังสือ ควรโชว์เฉพาะ Admin เท่านั้น */}
+              {role === 'admin' && (
+                <button className="add-book-btn" onClick={openAddModal}>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}>
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
                 เพิ่มหนังสือ
-              </button>
+              </button>)}
               <button className="btn-danger" onClick={handleLogout}>
                 Logout
               </button>
