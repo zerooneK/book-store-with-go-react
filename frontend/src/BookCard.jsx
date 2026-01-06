@@ -43,7 +43,7 @@ const BookCard = ({ book, onDelete, onEdit, isAdmin }) => {
         
         {/* แถวแสดง ราคา และ จำนวนคงเหลือ */}
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', width: '100%'}}>
-           <p className="card-price">฿{book.price?.toLocaleString()}</p>
+           <p className="card-price">฿{(book.price || 0).toLocaleString()}</p>
            
            {/* ป้ายแสดงสต็อก */}
            <span style={{

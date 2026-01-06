@@ -21,12 +21,11 @@ function App() {
   const [currentBookId, setCurrentBookId] = useState(null)
 
   useEffect(() => {
-    // Sync token from localStorage when component mounts (after login redirect)
-    const storedToken = localStorage.getItem('token')
-    if (storedToken && storedToken !== token) {
-      setToken(storedToken)
-    }
-    fetchBooks()
+      const storedToken = localStorage.getItem('token')
+      const storedRole = localStorage.getItem('role')
+      if (storedToken) setToken(storedToken)
+      if (storedRole) setRole(storedRole)
+      fetchBooks()
   }, [])
 
   const fetchBooks = async () => {
@@ -35,32 +34,6 @@ function App() {
       setBooks(response.data)
     } catch (error) {
       console.error("โหลดหนังสือไม่สำเร็จ", error)
-    }
-  }
-
-  // src/App.jsx
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    try {
-      const response = await axios.post('http://localhost:3000/login', {
-        email: email,
-        password: password
-      })
-      
-      const receivedToken = response.data.token
-      // 🔴 แก้ไขตรงนี้: รับค่า role จาก backend มาด้วย
-      const receivedRole = response.data.role 
-
-      setToken(receivedToken)
-      setRole(receivedRole) // อัปเดต State
-
-      localStorage.setItem('token', receivedToken)
-      localStorage.setItem('role', receivedRole) // บันทึกลงเครื่อง
-
-      alert("เข้าสู่ระบบสำเร็จ!")
-    } catch (error) {
-      alert("Login พลาด! เช็คอีเมลรหัสผ่านหน่อย")
     }
   }
 

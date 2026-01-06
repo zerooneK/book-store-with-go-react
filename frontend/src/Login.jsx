@@ -21,10 +21,11 @@ function Login({ onLoginSuccess }) {
             })
             const receivedToken = response.data.token
             localStorage.setItem('token', receivedToken)
+            localStorage.setItem('role', receivedRole)
 
             // Call parent callback if provided
             if (onLoginSuccess) {
-                onLoginSuccess(receivedToken)
+                onLoginSuccess(receivedToken, receivedRole)
             }
 
             Swal.fire({
