@@ -288,3 +288,24 @@
   transition: all 0.3s ease;
   filter: drop-shadow(0 2px 6px rgba(74, 222, 128, 0.4));
 }
+
+/* การ์ดตอนของหมด ให้ดูจางๆ หน่อย */
+.book-card.out-of-stock {
+  opacity: 0.7;
+  filter: grayscale(0.8); /* ทำเป็นขาวดำ */
+}
+
+/* ปุ่มใส่ตะกร้า (ปกติ) */
+.cart-btn {
+  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+}
+.cart-btn:hover {
+  background: linear-gradient(135deg, #00b09b 0%, #96c93d 80%);
+}
+
+/* ปุ่มตอน Disabled (กดไม่ได้) */
+.cart-btn.disabled {
+  background: #555;
+  cursor: not-allowed;
+  opacity: 0.5;
+}

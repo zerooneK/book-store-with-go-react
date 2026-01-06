@@ -2,12 +2,18 @@ import React from 'react';
 import './BookCard.css';
 
 const BookCard = ({ book, onDelete, onEdit, isAdmin }) => {
-  // ตรวจสอบว่ามีลิงก์รูปไหม ถ้าไม่มีให้ใช้รูป Placeholder
+  // 1. จัดการรูปภาพ (ถ้าไม่มีรูปให้ใช้ Placeholder)
   const displayImage = book.image_url ? book.image_url : "https://via.placeholder.com/150";
 
+  // 2. เช็คสต็อก (ถ้า stock เป็น 0 ถือว่าหมด)
+  // หมายเหตุ: ต้องมั่นใจว่า Backend ส่งค่า stock มาแล้ว (ถ้ายังไม่ส่ง ค่าจะเป็น undefined หรือ 0)
+  const isOutOfStock = book.stock === 0;
+
   return (
-    <div className="book-card">
-      {/* ดาวประดับมุมขวาบน */}
+    // ถ้าของหมด ให้เติม class 'out-of-stock' เพื่อทำสีจางๆ
+    <div className={`book-card ${isOutOfStock ? 'out-of-stock' : ''}`}>
+      
+      {/* ดาวประดับมุมขวาบน (Decoration) */}
       <div className="card-stars">
         <span className="star"></span>
         <span className="star"></span>
@@ -15,66 +21,78 @@ const BookCard = ({ book, onDelete, onEdit, isAdmin }) => {
       </div>
 
       <div className="card-content">
+        {/* ส่วนแสดงรูปภาพ */}
         <div className="card-image-container">
-          {/* 🔥 ส่วนที่อัปเดต: แสดงรูปภาพจริงแทนไอคอน */}
-          <img
-            src={displayImage}
-            alt={book.title}
+          <img 
+            src={displayImage} 
+            alt={book.title} 
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
+              width: '100%', 
+              height: '100%', 
+              objectFit: 'cover', 
               borderRadius: '8px'
-            }}
-            // ถ้ารูปโหลดไม่ได้ (ลิงก์เสีย) ให้กลับไปใช้รูป Placeholder
-            onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/150" }}
+            }} 
+            // ถ้ารูปโหลดไม่ได้ ให้กลับไปใช้รูป Placeholder
+            onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/150" }} 
           />
         </div>
 
+        {/* ข้อมูลหนังสือ */}
         <h3 className="card-title">{book.title}</h3>
         <p className="card-author">{book.author}</p>
-        <p className="card-price">฿{book.price?.toLocaleString()}</p>
+        
+        {/* แถวแสดง ราคา และ จำนวนคงเหลือ */}
+        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px', width: '100%'}}>
+           <p className="card-price">฿{book.price?.toLocaleString()}</p>
+           
+           {/* ป้ายแสดงสต็อก */}
+           <span style={{
+             fontSize: '0.8rem', 
+             fontWeight: 'bold',
+             color: isOutOfStock ? '#ff4b4b' : '#4cd964', // แดงถ้าหมด เขียวถ้ามี
+             border: `1px solid ${isOutOfStock ? '#ff4b4b' : '#4cd964'}`,
+             padding: '4px 8px',
+             borderRadius: '12px',
+             background: 'rgba(0,0,0,0.2)'
+           }}>
+             {isOutOfStock ? 'หมด' : `เหลือ ${book.stock} เล่ม`}
+           </span>
+        </div>
       </div>
 
-      {/* Action Buttons based on user role */}
+      {/* --- ส่วนปุ่มกด (Action Buttons) --- */}
       {isAdmin ? (
-        // Admin Mode: แสดงปุ่มแก้ไขและลบ
+        // 🅰️ สำหรับแอดมิน: ปุ่มแก้ไข และ ลบ
         <div className="action-btn-container">
-          {/* ปุ่มแก้ไข (สีเหลือง/ส้ม) */}
-          <button
+          <button 
             className="action-btn edit-btn"
             onClick={() => onEdit(book)}
-            title="แก้ไข"
+            title="แก้ไขข้อมูล"
           >
             <span>✏️ แก้ไข</span>
           </button>
 
-          {/* ปุ่มลบ (สีแดง) */}
           <button
             className="action-btn delete-btn"
             onClick={() => onDelete(book.ID)}
-            title="ลบ"
+            title="ลบหนังสือ"
           >
             <span>🗑️ ลบ</span>
           </button>
         </div>
       ) : (
-        // Guest/User Mode: แสดงปุ่มตะกร้าสีเขียว
+        // 👤 สำหรับลูกค้าทั่วไป: ปุ่มใส่ตะกร้า
         <div className="action-btn-container">
-          <button
-            className="action-btn cart-btn"
-            onClick={() => alert(`เพิ่ม "${book.title}" ลงตะกร้าแล้ว!`)}
-            title="เพิ่มลงตะกร้า"
+          <button 
+            className={`action-btn cart-btn ${isOutOfStock ? 'disabled' : ''}`}
+            disabled={isOutOfStock} // ถ้าของหมด ห้ามกด
+            onClick={() => alert(`คุณเลือก: ${book.title} (ระบบตะกร้ากำลังมาเร็วๆ นี้!)`)}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="cart-icon">
-              <circle cx="9" cy="21" r="1"></circle>
-              <circle cx="20" cy="21" r="1"></circle>
-              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-            </svg>
-            <span>เพิ่มลงตะกร้า</span>
+            {isOutOfStock ? '❌ สินค้าหมด' : '🛒 ใส่ตะกร้า'}
           </button>
         </div>
       )}
+
     </div>
   );
 };

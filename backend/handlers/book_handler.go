@@ -43,6 +43,7 @@ func UpdateBook(c *fiber.Ctx) error {
         Author string `json:"author"`
         Price  int    `json:"price"`
         ImageURL string `json:"image_url"`
+        Stock    int    `json:"stock"`
     }
     var updateData UpdateBookInput
 
@@ -58,6 +59,7 @@ func UpdateBook(c *fiber.Ctx) error {
         Author: updateData.Author,
         Price:  updateData.Price,
         ImageURL: updateData.ImageURL,
+        Stock: updateData.Stock,
     })
 
     // 5. ส่งข้อมูลล่าสุดกลับไป

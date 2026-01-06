@@ -9,4 +9,5 @@ type Book struct {
     Author string `json:"author"`
     Price  int    `json:"price" validate:"required,gte=0"`
     ImageURL string `json:"image_url"`
+    Stock    int    `json:"stock" gorm:"default:0"`
 }
