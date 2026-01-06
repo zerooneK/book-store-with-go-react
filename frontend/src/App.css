@@ -1,0 +1,676 @@
+/* รีเซ็ตค่าพื้นฐาน */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  color: #ffffff;
+  font-family: 'Poppins', 'Sarabun', sans-serif;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* ===== SPACE BACKGROUND ===== */
+.space-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg,
+      #0d0d1a 0%,
+      #1a1a2e 25%,
+      #16213e 50%,
+      #0d0d1a 75%,
+      #1a0a2e 100%);
+  z-index: -3;
+}
+
+/* ดาวกระพริบ */
+.stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background-image:
+    radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+    radial-gradient(2px 2px at 40px 70px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+    radial-gradient(2px 2px at 130px 80px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 160px 120px, #fff, transparent),
+    radial-gradient(2px 2px at 200px 50px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 250px 160px, #fff, transparent),
+    radial-gradient(2px 2px at 300px 100px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 350px 200px, #fff, transparent),
+    radial-gradient(2px 2px at 400px 150px, rgba(255, 255, 255, 0.9), transparent),
+    radial-gradient(1px 1px at 450px 250px, #fff, transparent),
+    radial-gradient(2px 2px at 500px 80px, rgba(255, 255, 255, 0.7), transparent),
+    radial-gradient(1px 1px at 550px 180px, #fff, transparent),
+    radial-gradient(2px 2px at 600px 220px, rgba(255, 255, 255, 0.8), transparent),
+    radial-gradient(1px 1px at 650px 60px, #fff, transparent),
+    radial-gradient(2px 2px at 700px 300px, rgba(255, 255, 255, 0.9), transparent);
+  background-size: 750px 350px;
+  animation: twinkle 4s ease-in-out infinite alternate;
+}
+
+@keyframes twinkle {
+  0% {
+    opacity: 0.7;
+  }
+
+  100% {
+    opacity: 1;
+  }
+}
+
+/* กาแล็กซี่เรืองแสง */
+.galaxy-glow {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle,
+      rgba(138, 43, 226, 0.15) 0%,
+      rgba(75, 0, 130, 0.1) 30%,
+      transparent 70%);
+  z-index: -1;
+  animation: pulse 8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* ดาวตก */
+.shooting-stars {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.shooting-star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: linear-gradient(45deg, #fff, transparent);
+  border-radius: 50%;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.8);
+  animation: shooting 3s ease-in infinite;
+}
+
+.shooting-star:nth-child(1) {
+  top: 10%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.shooting-star:nth-child(2) {
+  top: 20%;
+  left: 40%;
+  animation-delay: 1.5s;
+}
+
+.shooting-star:nth-child(3) {
+  top: 5%;
+  left: 70%;
+  animation-delay: 3s;
+}
+
+@keyframes shooting {
+  0% {
+    transform: translateX(0) translateY(0);
+    opacity: 1;
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateX(300px) translateY(300px);
+    opacity: 0;
+  }
+}
+
+/* ===== GLASSMORPHISM BASE ===== */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* ===== NAVBAR ===== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(13, 13, 26, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+.nav-logo {
+  font-size: 1.6rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.nav-logo-icon {
+  font-size: 1.8rem;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+/* ปุ่มเพิ่มหนังสือบน Navbar */
+.add-book-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.add-book-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.add-book-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ===== LOGIN FORM ON NAVBAR ===== */
+.nav-login-form {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* ===== GLASS INPUT ===== */
+.glass-input {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: white;
+  padding: 10px 15px;
+  border-radius: 10px;
+  outline: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.glass-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.glass-input:focus {
+  border-color: #667eea;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 15px rgba(102, 126, 234, 0.3);
+}
+
+/* ===== BUTTONS ===== */
+.btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(255, 65, 108, 0.4);
+}
+
+.btn-danger:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 25px rgba(255, 65, 108, 0.6);
+}
+
+/* ===== ADMIN BADGE ===== */
+.admin-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(102, 126, 234, 0.2);
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  color: #a5b4fc;
+  font-size: 0.9rem;
+}
+
+/* ===== MODAL OVERLAY ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal-content {
+  background: rgba(26, 26, 46, 0.95);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 30px;
+  width: 90%;
+  max-width: 450px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.modal-close:hover {
+  background: rgba(255, 65, 108, 0.3);
+  color: #ff416c;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.modal-form .glass-input {
+  width: 100%;
+  padding: 14px 18px;
+  font-size: 1rem;
+}
+
+.modal-form .btn-primary {
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  margin-top: 10px;
+}
+
+/* ===== BOOK GRID ===== */
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 20px 60px;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.section-title h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+
+.section-title p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1rem;
+}
+
+/* Section Icon (Custom Image) */
+.section-icon {
+  width: 50px;
+  height: 50px;
+  margin-right: 15px;
+  vertical-align: middle;
+  border-radius: 12px;
+  filter: drop-shadow(0 4px 15px rgba(102, 126, 234, 0.5));
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes iconFloat {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.book-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 10px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+
+  .nav-actions {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-login-form {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .glass-input {
+    min-width: 100px;
+  }
+
+  .book-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .modal-content {
+    margin: 20px;
+    padding: 20px;
+  }
+}
+
+/* --- LOGIN MODAL SPECIAL STYLE --- */
+.login-card {
+  background: rgba(13, 13, 26, 0.7);
+  /* พื้นหลังเข้มกว่าปกติหน่อยให้อ่านง่าย */
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.6),
+    0 0 30px rgba(102, 126, 234, 0.2),
+    /* แสงนีออนรอบๆ */
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: floatUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+}
+
+@keyframes floatUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.login-header {
+  margin-bottom: 30px;
+}
+
+.login-icon {
+  font-size: 4rem;
+  margin-bottom: 10px;
+  display: inline-block;
+  filter: drop-shadow(0 0 15px rgba(102, 126, 234, 0.6));
+  animation: hover-icon 3s infinite ease-in-out;
+}
+
+@keyframes hover-icon {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.login-title {
+  font-size: 2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 5px;
+}
+
+.login-subtitle {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.9rem;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-input-group {
+  position: relative;
+}
+
+.login-input-group input {
+  width: 100%;
+  padding: 16px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.login-input-group input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #667eea;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+  outline: none;
+}
+
+.btn-login-submit {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-top: 10px;
+  box-shadow: 0 5px 20px rgba(118, 75, 162, 0.4);
+}
+
+.btn-login-submit:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(118, 75, 162, 0.6);
+}
+
+/* --- ปรับปรุง Layout หลัก --- */
+
+/* 1. บังคับให้ root element มีความสูงเต็มจอก่อน */
+html,
+body,
+#root {
+  height: 100%;
+}
+
+/* 2. ปรับ container หลักให้มีความยืดหยุ่น */
+.container {
+  /* กำหนดความสูงขั้นต่ำให้เต็มจอ ลบด้วยความสูง Navbar (ประมาณ 80px) */
+  min-height: calc(100vh - 100px);
+  display: flex;
+  flex-direction: column;
+  /* ปกติให้เนื้อหาเริ่มจากด้านบน (เผื่อตอน Login แล้วมีของเยอะ) */
+  justify-content: flex-start;
+  transition: all 0.5s ease;
+  /* เพิ่ม effect ตอนเปลี่ยนโหมดนิดนึง */
+}
+
+/* --- 🔥 คลาสพระเอก: จัดกึ่งกลางเฉพาะตอน Guest Mode --- */
+.guest-mode-center {
+  /* สั่งให้เนื้อหาภายในมาอยู่ตรงกลางแนวตั้ง */
+  justify-content: center;
+  align-items: center;
+  /* ลด padding บนล่างลงหน่อย เพื่อให้ดูสมดุลขึ้นเมื่ออยู่ตรงกลาง */
+  padding-top: 20px;
+  padding-bottom: 80px;
+  /* ดันขึ้นจากขอบล่างนิดนึงไม่ให้อึดอัด */
+}
+
+/* ปรับแต่ง section-title เล็กน้อยให้ดูดีขึ้นตอนอยู่ตรงกลาง */
+.guest-mode-center .section-title {
+  margin-bottom: 40px;
+  transform: scale(1.1);
+  /* ขยายหัวข้อให้เด่นขึ้นนิดนึงตอนหน้าโล่งๆ */
+  transition: transform 0.3s ease;
+}
