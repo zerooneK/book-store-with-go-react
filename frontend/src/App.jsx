@@ -13,19 +13,19 @@ function App() {
   const [role, setRole] = useState(localStorage.getItem('role') || '')
   const [name, setName] = useState(localStorage.getItem('name') || '')
 
-  // State สำหรับ Book Form
+  // ข้อมูลสำหรับจัดการหนังสือ (เพิ่ม/แก้ไข)
   const [newBook, setNewBook] = useState({ title: '', author: '', price: 0, image_url: '', stock: 0 })
 
-  // State ควบคุมการเปิด/ปิด Modal
+  // สถานะการควบคุมหน้าต่าง Modal และโหมดการทำงาน
   const [showAddModal, setShowAddModal] = useState(false)
-
   const [isEditing, setIsEditing] = useState(false)
   const [currentBookId, setCurrentBookId] = useState(null)
 
-  // --- 2. State สำหรับตะกร้า ---
+  // ข้อมูลตะกร้าสินค้าและการแสดงผล
   const [cartItems, setCartItems] = useState([])
   const [showCart, setShowCart] = useState(false)
 
+  // โหลดข้อมูลเริ่มต้นและข้อมูลตะกร้าเมื่อเข้าสู่ระบบ
   useEffect(() => {
     fetchBooks()
     if (token) {
@@ -33,7 +33,7 @@ function App() {
     }
   }, [token])
 
-
+  // ดึงรายการหนังสือทั้งหมดจาก API
   const fetchBooks = async () => {
     try {
       const response = await axios.get('http://localhost:3000/books')
@@ -43,12 +43,13 @@ function App() {
     }
   }
 
+  // ออกจากระบบ ล้างค่าใน State และ LocalStorage
   const handleLogout = () => {
     setToken('')
     setRole('')
     setName('')
     setCartItems([])
-    setShowCart(false) // ปิดตะกร้าเมื่อ Logout
+    setShowCart(false)
     localStorage.clear()
     Swal.fire({
       icon: 'info',
@@ -60,14 +61,15 @@ function App() {
     })
   }
 
+  // เปิด Modal เพื่อเพิ่มหนังสือใหม่
   const openAddModal = () => {
     setIsEditing(false)
     setCurrentBookId(null)
-    // เพิ่ม stock: 0
     setNewBook({ title: '', author: '', price: 0, image_url: '', stock: 0 })
     setShowAddModal(true)
   }
 
+  // เปิด Modal พร้อมโหลดข้อมูลหนังสือเพื่อแก้ไข
   const handleEditClick = (book) => {
     setIsEditing(true)
     setCurrentBookId(book.ID)
@@ -76,11 +78,12 @@ function App() {
       author: book.author,
       price: book.price,
       image_url: book.image_url || '',
-      stock: book.stock || 0 // <--- ดึงค่า stock มาใส่
+      stock: book.stock || 0
     })
     setShowAddModal(true)
   }
 
+  // ส่งข้อมูลหนังสือ (เพิ่มหรือแก้ไข) ไปยัง Backend
   const handleSaveBook = async (e) => {
     e.preventDefault()
     try {
@@ -99,6 +102,7 @@ function App() {
     }
   }
 
+  // ลบหนังสือออกจากระบบ (เฉพาะ Admin)
   const handleDeleteBook = async (id) => {
     Swal.fire({
       title: 'แน่ใจนะว่าจะลบ?',
@@ -126,8 +130,7 @@ function App() {
     })
   }
 
-  // --- 3. ฟังก์ชันจัดการตะกร้า ---
-
+  // ดึงข้อมูลสินค้าในตะกร้าของผู้ใช้งาน
   const fetchCart = async () => {
     try {
       const response = await axios.get('http://localhost:3000/api/cart', {
@@ -139,6 +142,7 @@ function App() {
     }
   }
 
+  // เพิ่มหนังสือลงในตะกร้า
   const handleAddToCart = async (bookId) => {
     if (!token) {
       Swal.fire({
@@ -157,7 +161,6 @@ function App() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
 
-      // แจ้งเตือนเล็กๆ
       const Toast = Swal.mixin({
         toast: true,
         position: 'top-end',
@@ -169,7 +172,7 @@ function App() {
       })
       Toast.fire({ icon: 'success', title: 'เพิ่มลงตะกร้าแล้ว!' })
 
-      fetchCart() // อัปเดตข้อมูลตะกร้าทันที
+      fetchCart()
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -181,12 +184,13 @@ function App() {
     }
   }
 
+  // ลบสินค้าออกจากตะกร้า
   const handleRemoveFromCart = async (itemId) => {
     try {
       await axios.delete(`http://localhost:3000/api/cart/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      fetchCart() // โหลดใหม่
+      fetchCart()
     } catch (error) {
       console.error("ลบสินค้าไม่สำเร็จ", error)
     }
@@ -194,7 +198,7 @@ function App() {
 
   return (
     <div>
-      {/* Background Effects */}
+      {/* เอฟเฟกต์ภาพพื้นหลังอวกาศ */}
       <div className="space-background"></div>
       <div className="stars"></div>
       <div className="galaxy-glow"></div>
@@ -203,7 +207,7 @@ function App() {
         <div className="shooting-star"></div>
       </div>
 
-      {/* Navbar */}
+      {/* แถบเมนูด้านบน (Navbar) */}
       <nav className="navbar glass-panel">
         <div className="nav-logo">
           <span className="nav-logo-icon">🚀</span> SPACE BOOK STORE
@@ -218,7 +222,6 @@ function App() {
                 <div className="admin-badge"><span>👮</span> Admin Mode</div>
               ) : (
                 <>
-                  {/* --- 4. ปุ่มตะกร้า (โชว์เฉพาะ User) --- */}
                   <button className="nav-cart-btn" onClick={() => setShowCart(true)}>
                     🛒
                     {cartItems.length > 0 && (
@@ -232,7 +235,7 @@ function App() {
                 </>
               )}
 
-              {/* ปุ่มเพิ่มหนังสือ (Admin Only) */}
+              {/* เฉพาะ Admin เท่านั้นที่เห็นปุ่มเพิ่มหนังสือ */}
               {role === 'admin' && (
                 <button className="add-book-btn" onClick={openAddModal}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -246,7 +249,7 @@ function App() {
         </div>
       </nav>
 
-      {/* --- 5. Modal ตะกร้า --- */}
+      {/* หน้าต่างตะกร้าสินค้า */}
       {showCart && (
         <Cart
           cartItems={cartItems}
@@ -255,7 +258,7 @@ function App() {
         />
       )}
 
-      {/* Add/Edit Book Modal */}
+      {/* หน้าต่างจัดการข้อมูลหนังสือ (เพิ่ม/แก้ไข) */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -286,7 +289,7 @@ function App() {
         </div>
       )}
 
-      {/* Main Content */}
+      {/* รายการหนังสือหลัก */}
       <div className={`container ${!token ? 'guest-mode-center' : ''}`}>
         <div className="section-title">
           <h2><img src={sectionIcon} alt="icon" className="section-icon" />คลังหนังสือจักรวาล</h2>
