@@ -68,6 +68,11 @@ func main() {
     api.Put("/book/:id", handlers.UpdateBook)
     api.Delete("/book/:id", handlers.DeleteBook) 
 
+    userApi := app.Group("/api", jwtMiddleware) // สร้างกลุ่มใหม่
+    userApi.Post("/cart", handlers.AddToCart)
+    userApi.Get("/cart", handlers.GetCart)
+    userApi.Delete("/cart/:id", handlers.DeleteCartItem)
+
     // 5. รัน
     app.Listen(":3000")
 }

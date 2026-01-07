@@ -42,6 +42,7 @@ func ConnectDb() {
     //สร้าง table บน DB ตาม struct ที่สร้างไว้
     db.AutoMigrate(&models.Book{})
     db.AutoMigrate(&models.User{})
+    db.AutoMigrate(&models.CartItem{})
 
     // เก็บค่า connection ไว้ในตัวแปร Global
     DB = db
