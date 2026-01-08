@@ -5,9 +5,12 @@ import axios from 'axios'
 import Swal from 'sweetalert2'
 import './Login.css' // ใช้ CSS เดียวกับหน้า Login ได้เลย ธีมเดียวกัน
 
+// 1. กำหนดค่าคงที่สำหรับ API Base URL
+const API_BASE_URL = 'http://localhost:3000'
+
 function Register() {
     const navigate = useNavigate()
-    
+
     // State สำหรับเก็บข้อมูลฟอร์ม
     const [formData, setFormData] = useState({
         name: '',
@@ -15,7 +18,7 @@ function Register() {
         password: '',
         confirmPassword: ''
     })
-    
+
     const [isLoading, setIsLoading] = useState(false)
 
     // ฟังก์ชันจัดการการพิมพ์ใน Input
@@ -28,19 +31,36 @@ function Register() {
 
     const handleRegister = async (e) => {
         e.preventDefault()
-        
-        // 1. ตรวจสอบความถูกต้องเบื้องต้น (Validation)
+
+        // --- 2. การตรวจสอบความถูกต้องขั้นสูง (Advanced Validation) ---
+
+        // ตรวจสอบความสอดคล้องของรหัสผ่าน
         if (formData.password !== formData.confirmPassword) {
             Swal.fire({
                 icon: 'error',
                 title: 'รหัสผ่านไม่ตรงกัน',
-                text: 'กรุณากรอกรหัสผ่านยืนยันให้ถูกต้อง',
+                text: 'กรุณากรอกรหัสผ่านยืนยันให้ตรงกับรหัสผ่านที่ตั้งไว้',
                 background: '#1a1a2e',
                 color: '#fff'
             })
             return
         }
 
+        // ตรวจสอบความแข็งแรงของรหัสผ่าน (Regex: ต้องมีทั้งตัวอักษรและตัวเลข)
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d).+$/;
+        if (!passwordRegex.test(formData.password)) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'รหัสผ่านไม่ปลอดภัยพอ',
+                text: 'รหัสผ่านต้องมีตัวอักษรและตัวเลขผสมกันอย่างน้อยอย่างละ 1 ตัว',
+                background: '#1a1a2e',
+                color: '#fff',
+                confirmButtonColor: '#ffb300'
+            })
+            return
+        }
+
+        // ตรวจสอบความยาวขั้นต่ำ
         if (formData.password.length < 8) {
             Swal.fire({
                 icon: 'warning',
@@ -55,11 +75,14 @@ function Register() {
         setIsLoading(true)
 
         try {
+            // --- 3. การเตรียมข้อมูล (Data Cleaning) ---
+            const cleanName = formData.name.trim()
+            const cleanEmail = formData.email.trim()
+
             // 2. ยิง API ไปที่ Backend
-            // ส่งไปแค่ name, email, password (confirmPassword ไม่ต้องส่ง)
-            await axios.post('http://localhost:3000/signup', {
-                name: formData.name,
-                email: formData.email,
+            await axios.post(`${API_BASE_URL}/signup`, {
+                name: cleanName,
+                email: cleanEmail,
                 password: formData.password
             })
 
@@ -67,7 +90,7 @@ function Register() {
             Swal.fire({
                 icon: 'success',
                 title: 'สมัครสมาชิกสำเร็จ!',
-                text: 'ยินดีต้อนรับสู่ยานแม่! กรุณาเข้าสู่ระบบ',
+                text: 'ยินดีต้อนรับสู่ยานแม่! กรุณาเข้าสู่ระบบเพื่อเริ่มต้นการเดินทาง',
                 background: '#1a1a2e',
                 color: '#fff',
                 confirmButtonColor: '#667eea',
@@ -77,11 +100,16 @@ function Register() {
             })
 
         } catch (error) {
-            // 4. ถ้ามี Error (เช่น อีเมลซ้ำ)
+            // 4. ถ้ามี Error (เช่น อีเมลซ้ำ หรือเซิร์ฟเวอร์มีปัญหา)
+            let errorMessage = error.response?.data?.error || 'เกิดข้อผิดพลาดบางอย่างในการสมัครสมาชิก'
+            if (!error.response) {
+                errorMessage = 'ไม่สามารถเชื่อมต่อเครื่องแม่ข่ายได้ กรุณาลองใหม่ภายหลัง'
+            }
+
             Swal.fire({
                 icon: 'error',
                 title: 'สมัครสมาชิกไม่สำเร็จ',
-                text: error.response?.data?.error || 'เกิดข้อผิดพลาดบางอย่าง',
+                text: errorMessage,
                 background: '#1a1a2e',
                 color: '#fff',
                 confirmButtonColor: '#ff416c'
@@ -93,7 +121,7 @@ function Register() {
 
     return (
         <div className="login-page">
-            {/* Background Effects (ใช้ Class เดิมจาก Login) */}
+            {/* รักษาเอฟเฟกต์ภาพพื้นหลังอวกาศไว้ตามเดิม */}
             <div className="login-space-background"></div>
             <div className="login-stars"></div>
             <div className="login-nebula login-nebula-1"></div>
@@ -110,7 +138,7 @@ function Register() {
                     <div className="login-page-header">
                         <div className="login-page-icon">👽</div>
                         <h1 className="login-page-title">Join the Crew</h1>
-                        <p className="login-page-subtitle">สมัครสมาชิกเพื่อเริ่มต้นการเดินทาง</p>
+                        <p className="login-page-subtitle">สมัครสมาชิกเพื่อเริ่มต้นการเดินทางสู่จักรวาลแห่งความรู้</p>
                     </div>
 
                     <form className="login-page-form" onSubmit={handleRegister}>
@@ -147,7 +175,7 @@ function Register() {
                                 id="password"
                                 type="password"
                                 className="login-page-input"
-                                placeholder="•••••••• (Min 8 chars)"
+                                placeholder="•••••••• (ตัวอักษรและตัวเลขอย่างน้อย 8 ตัว)"
                                 value={formData.password}
                                 onChange={handleChange}
                                 required
@@ -173,7 +201,7 @@ function Register() {
                             className="btn-login-page-submit"
                             disabled={isLoading}
                         >
-                            {isLoading ? '⏳ กำลังสมัคร...' : '✨ Sign Up Now'}
+                            {isLoading ? '⏳ กำลังสมัครสมาชิก...' : '✨ Sign Up Now'}
                         </button>
                     </form>
 
