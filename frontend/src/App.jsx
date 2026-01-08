@@ -5,6 +5,7 @@ import Swal from 'sweetalert2'
 import Cart from './Cart'
 import './App.css'
 import BookCard from './BookCard'
+import BookDetailModal from './BookDetailModal'
 import sectionIcon from './assets/Icon.png'
 
 function App() {
@@ -14,12 +15,13 @@ function App() {
   const [name, setName] = useState(localStorage.getItem('name') || '')
 
   // ข้อมูลสำหรับจัดการหนังสือ (เพิ่ม/แก้ไข)
-  const [newBook, setNewBook] = useState({ title: '', author: '', price: 0, image_url: '', stock: 0 })
+  const [newBook, setNewBook] = useState({ title: '', author: '', description: '', price: 0, image_url: '', stock: 0 })
 
   // สถานะการควบคุมหน้าต่าง Modal และโหมดการทำงาน
   const [showAddModal, setShowAddModal] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [currentBookId, setCurrentBookId] = useState(null)
+  const [selectedBookForCart, setSelectedBookForCart] = useState(null);
 
   // ข้อมูลตะกร้าสินค้าและการแสดงผล
   const [cartItems, setCartItems] = useState([])
@@ -65,7 +67,7 @@ function App() {
   const openAddModal = () => {
     setIsEditing(false)
     setCurrentBookId(null)
-    setNewBook({ title: '', author: '', price: 0, image_url: '', stock: 0 })
+    setNewBook({ title: '', author: '', description: '', price: 0, image_url: '', stock: 0 })
     setShowAddModal(true)
   }
 
@@ -76,6 +78,7 @@ function App() {
     setNewBook({
       title: book.title,
       author: book.author,
+      description: book.description || '',
       price: book.price,
       image_url: book.image_url || '',
       stock: book.stock || 0
@@ -184,6 +187,49 @@ function App() {
     }
   }
 
+  // เปิด Modal รายละเอียดหนังสือ
+  const openBookDetail = (bookId) => {
+    const book = books.find(b => b.ID === bookId);
+    if (book) {
+      setSelectedBookForCart(book);
+    }
+  };
+
+  // ยืนยันการเพิ่มลงตะกร้า (จาก Modal)
+  const confirmAddToCart = async (bookId, quantity) => {
+    if (!token) {
+      Swal.fire({ icon: 'warning', title: 'กรุณาเข้าสู่ระบบก่อนนะครับ', background: '#1a1a2e', color: '#fff' });
+      return;
+    }
+
+    try {
+      await axios.post('http://localhost:3000/api/cart',
+        { book_id: bookId, quantity: quantity },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+
+      setSelectedBookForCart(null);
+
+      Swal.fire({
+        icon: 'success',
+        title: 'เพิ่มลงตะกร้าแล้ว!',
+        text: `เพิ่ม ${quantity} เล่ม เรียบร้อย`,
+        timer: 1500,
+        showConfirmButton: false,
+        background: '#1a1a2e', color: '#fff'
+      });
+
+      fetchCart();
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.response?.data?.error || 'เกิดข้อผิดพลาด',
+        background: '#1a1a2e', color: '#fff'
+      });
+    }
+  };
+
   // ลบสินค้าออกจากตะกร้า
   const handleRemoveFromCart = async (itemId) => {
     try {
@@ -258,6 +304,15 @@ function App() {
         />
       )}
 
+      {/* หน้าต่างรายละเอียดสินค้า (Modal) */}
+      {selectedBookForCart && (
+        <BookDetailModal
+          book={selectedBookForCart}
+          onClose={() => setSelectedBookForCart(null)}
+          onConfirm={confirmAddToCart}
+        />
+      )}
+
       {/* หน้าต่างจัดการข้อมูลหนังสือ (เพิ่ม/แก้ไข) */}
       {showAddModal && (
         <div className="modal-overlay" onClick={() => setShowAddModal(false)}>
@@ -271,6 +326,14 @@ function App() {
             <form className="modal-form" onSubmit={handleSaveBook}>
               <input className="glass-input" placeholder="ชื่อหนังสือ..." value={newBook.title} onChange={e => setNewBook({ ...newBook, title: e.target.value })} required />
               <input className="glass-input" placeholder="ชื่อผู้แต่ง..." value={newBook.author} onChange={e => setNewBook({ ...newBook, author: e.target.value })} required />
+              <textarea
+                className="glass-input"
+                placeholder="เรื่องย่อ (Synopsis)..."
+                value={newBook.description || ''}
+                onChange={e => setNewBook({ ...newBook, description: e.target.value })}
+                rows="4"
+                style={{ resize: 'none' }}
+              />
               <input className="glass-input" type="number" placeholder="ราคา..." value={newBook.price} onChange={e => setNewBook({ ...newBook, price: parseInt(e.target.value) || 0 })} required />
               <input
                 className="glass-input"
@@ -304,7 +367,7 @@ function App() {
               isAdmin={token && role === 'admin'}
               onDelete={handleDeleteBook}
               onEdit={handleEditClick}
-              onAddToCart={handleAddToCart}
+              onAddToCart={openBookDetail}
             />
           ))}
         </div>

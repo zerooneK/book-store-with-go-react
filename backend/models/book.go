@@ -10,4 +10,5 @@ type Book struct {
     Price  int    `json:"price" validate:"required,gte=0"`
     ImageURL string `json:"image_url"`
     Stock    int    `json:"stock" gorm:"default:0"`
+    Description string `json:"description"`
 }

@@ -47,6 +47,7 @@ func UpdateBook(c *fiber.Ctx) error {
 		Title    string `json:"title"`
 		Author   string `json:"author"`
 		Price    int    `json:"price"`
+		Description string `json:"description"`
 		ImageURL string `json:"image_url"`
 		Stock    int    `json:"stock"`
 	}
@@ -59,12 +60,13 @@ func UpdateBook(c *fiber.Ctx) error {
 	}
 
 	// 4. สั่งอัปเดต (ใช้ Select เพื่อให้อัปเดตค่าที่เป็น 0 หรือค่าว่างได้ด้วย)
-	if err := database.DB.Model(&book).Select("Title", "Author", "Price", "ImageURL", "Stock").Updates(models.Book{
+	if err := database.DB.Model(&book).Select("Title", "Author", "Price", "ImageURL", "Stock", "Description").Updates(models.Book{
 		Title:    updateData.Title,
 		Author:   updateData.Author,
 		Price:    updateData.Price,
 		ImageURL: updateData.ImageURL,
 		Stock:    updateData.Stock,
+		Description: updateData.Description,
 	}).Error; err != nil {
 		return c.Status(500).JSON(fiber.Map{"error": "Could not update book"})
 	}
