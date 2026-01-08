@@ -27,22 +27,27 @@ func ConnectDb() {
     )
 
     //ทำการสร้างอ๊อบเจคขึ้นมาเพื่อเก็บข้อมูลการเชื่อมต่อฐานข้อมูลและ error
-    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+    db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+        Logger: logger.Default.LogMode(logger.Info),
+    })
     //ถ้าเกิด error ให้ทำการแสดง log error แจ้ง user
     if err != nil {
         log.Fatal("Failed to connect to database. \n", err)
     }
 
-    log.Println("connected")
-    //ทำการแสดง Log info ทุกอย่าง
-    db.Logger = logger.Default.LogMode(logger.Info)
+    log.Println("✅ Database connected successfully")
 
     // Auto Migrate ย้ายมาทำตรงนี้
-    log.Println("running migrations")
-    //สร้าง table บน DB ตาม struct ที่สร้างไว้
-    db.AutoMigrate(&models.Book{})
-    db.AutoMigrate(&models.User{})
-    db.AutoMigrate(&models.CartItem{})
+    log.Println("🚀 Running migrations...")
+    err = db.AutoMigrate(
+        &models.Book{}, 
+        &models.User{}, 
+        &models.CartItem{},
+    )
+    if err != nil {
+        log.Fatal("❌ Migration failed: ", err)
+    }
+    log.Println("✅ Migrations completed successfully")
 
     // เก็บค่า connection ไว้ในตัวแปร Global
     DB = db
