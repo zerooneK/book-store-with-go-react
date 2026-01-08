@@ -106,6 +106,41 @@
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
 }
 
+/* ===== NEW REFACTORED UTILITIES ===== */
+.book-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.book-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.stock-badge {
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid transparent;
+}
+
+.stock-badge.available {
+  color: #4cd964;
+  border-color: #4cd964;
+}
+
+.stock-badge.out {
+  color: #ff4b4b;
+  border-color: #ff4b4b;
+}
+
 /* ===== CARD TITLE ===== */
 .card-title {
   font-size: 1.15rem;
@@ -292,13 +327,15 @@
 /* การ์ดตอนของหมด ให้ดูจางๆ หน่อย */
 .book-card.out-of-stock {
   opacity: 0.7;
-  filter: grayscale(0.8); /* ทำเป็นขาวดำ */
+  filter: grayscale(0.8);
+  /* ทำเป็นขาวดำ */
 }
 
 /* ปุ่มใส่ตะกร้า (ปกติ) */
 .cart-btn {
   background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
 }
+
 .cart-btn:hover {
   background: linear-gradient(135deg, #00b09b 0%, #96c93d 80%);
 }
