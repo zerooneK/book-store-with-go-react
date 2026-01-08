@@ -59,14 +59,15 @@ func Login(c *fiber.Ctx) error {
 
     // 2. ค้นหา User ใน Database ด้วย Email
     var user models.User
-    // ถ้าหาไม่เจอ (.Error != nil) แปลว่าไม่มีอีเมลนี้ในระบบ
+    // ในฟังก์ชัน Login
     if err := database.DB.Where("email = ?", input.Email).First(&user).Error; err != nil {
-        return c.Status(401).JSON(fiber.Map{"error": "User not found"}) // 401 Unauthorized
+        // เปลี่ยนจาก "User not found" เป็นข้อความกลางๆ
+        return c.Status(401).JSON(fiber.Map{"error": "Invalid email or password"})
     }
 
-    // 3. ตรวจสอบรหัสผ่าน (เช็คว่า Password ดิบ ตรงกับ Hash ใน DB ไหม)
     if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.Password)); err != nil {
-        return c.Status(401).JSON(fiber.Map{"error": "Incorrect password"})
+        // เปลี่ยนจาก "Incorrect password" เป็นข้อความกลางๆ
+        return c.Status(401).JSON(fiber.Map{"error": "Invalid email or password"})
     }
 
     // --- ถ้าผ่านมาถึงตรงนี้ แปลว่า Login สำเร็จ! มาออกบัตรผ่านกัน ---
