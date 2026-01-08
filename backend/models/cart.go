@@ -4,9 +4,8 @@ import "gorm.io/gorm"
 
 type CartItem struct {
     gorm.Model
-    UserID   uint   `json:"user_id"`
-    BookID   uint   `json:"book_id"`
-    // Preload: ดึงข้อมูลหนังสือมาโชว์ด้วย (ชื่อ, ราคา, รูป)
-    Book     Book   `json:"book" gorm:"foreignKey:BookID"` 
+    UserID   uint   `json:"user_id" gorm:"not null"`
+    BookID   uint   `json:"book_id" gorm:"not null"`
+    Book     Book   `json:"book" gorm:"foreignKey:BookID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"` 
     Quantity int    `json:"quantity" gorm:"default:1"`
 }
