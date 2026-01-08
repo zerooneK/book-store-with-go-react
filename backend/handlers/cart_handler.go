@@ -1,4 +1,3 @@
-// handlers/cart_handler.go
 package handlers
 
 import (
@@ -9,15 +8,15 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// Helper Function: ดึง UserID จาก Token
+// getUserID: ฟังก์ชันช่วยสำหรับดึง User ID จาก Token ที่ส่งมากับ Request
 func getUserID(c *fiber.Ctx) uint {
 	userToken := c.Locals("user").(*jwt.Token)
 	claims := userToken.Claims.(jwt.MapClaims)
-	// แปลงค่า user_id จาก float64 (JWT default) เป็น uint
+	// แปลงค่า user_id จาก float64 (ค่าเริ่มต้นของ JWT) เป็น uint
 	return uint(claims["user_id"].(float64))
 }
 
-// 1. เพิ่มสินค้าลงตะกร้า
+// AddToCart: เพิ่มสินค้าลงในตะกร้าของผู้ใช้
 func AddToCart(c *fiber.Ctx) error {
 	userID := getUserID(c)
 
@@ -27,28 +26,34 @@ func AddToCart(c *fiber.Ctx) error {
 	}
 	input := new(CartInput)
 	if err := c.BodyParser(input); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
+		return c.Status(400).JSON(fiber.Map{"error": "ข้อมูลที่ส่งมาไม่ถูกต้อง"})
 	}
 
-	// เช็คสต็อกก่อน!
+	// 1. ตรวจสอบจำนวนสินค้าที่ส่งมา
+	if input.Quantity <= 0 {
+		return c.Status(400).JSON(fiber.Map{"error": "จำนวนสินค้าต้องมากกว่า 0"})
+	}
+
+	// 2. ตรวจสอบว่ามีหนังสือจริงและสต็อกเพียงพอไหม
 	var book models.Book
 	if err := database.DB.First(&book, input.BookID).Error; err != nil {
-		return c.Status(404).JSON(fiber.Map{"error": "Book not found"})
-	}
-	if book.Stock < input.Quantity {
-		return c.Status(400).JSON(fiber.Map{"error": "Not enough stock"})
+		return c.Status(404).JSON(fiber.Map{"error": "ไม่พบหนังสือที่ต้องการ"})
 	}
 
-	// เช็คว่า User นี้เคยหยิบเล่มนี้ใส่ตะกร้าหรือยัง?
+	if book.Stock < input.Quantity {
+		return c.Status(400).JSON(fiber.Map{"error": "จำนวนสินค้าในคลังไม่พอ"})
+	}
+
+	// 3. ตรวจสอบว่าเคยมีในตะกร้าแล้วหรือยัง
 	var cartItem models.CartItem
 	result := database.DB.Where("user_id = ? AND book_id = ?", userID, input.BookID).First(&cartItem)
 
 	if result.Error == nil {
-		// กรณีมีอยู่แล้ว -> อัปเดตจำนวน
+		// ถ้ามีอยู่แล้วให้บวกเพิ่ม
 		cartItem.Quantity += input.Quantity
 		database.DB.Save(&cartItem)
 	} else {
-		// กรณีไม่มี -> สร้างใหม่
+		// ถ้ายังไม่มีให้สร้างใหม่
 		newItem := models.CartItem{
 			UserID:   userID,
 			BookID:   input.BookID,
@@ -57,30 +62,33 @@ func AddToCart(c *fiber.Ctx) error {
 		database.DB.Create(&newItem)
 	}
 
-	return c.JSON(fiber.Map{"message": "Added to cart successfully"})
+	return c.JSON(fiber.Map{"message": "เพิ่มสินค้าลงตะกร้าสำเร็จ"})
 }
 
-// 2. ดูตะกร้าของฉัน
+// GetCart: ดึงรายการสินค้าทั้งหมดในตะกร้าของผู้ใช้คนนั้นๆ
 func GetCart(c *fiber.Ctx) error {
 	userID := getUserID(c)
 	var cartItems []models.CartItem
 
-	// Preload("Book") คือสั่งให้จอยตารางเอาข้อมูลหนังสือมาด้วย
-	database.DB.Where("user_id = ?", userID).Preload("Book").Find(&cartItems)
+	// ใช้ Preload("Book") เพื่อดึงรายละเอียดข้อมูลหนังสือมาพร้อมกัน
+	if err := database.DB.Where("user_id = ?", userID).Preload("Book").Find(&cartItems).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "ไม่สามารถดึงข้อมูลตะกร้าได้"})
+	}
 
 	return c.JSON(cartItems)
 }
 
-// 3. ลบสินค้าจากตะกร้า
+// DeleteCartItem: ลบสินค้าที่ต้องการออกจากตะกร้า
 func DeleteCartItem(c *fiber.Ctx) error {
 	userID := getUserID(c)
-	itemID := c.Params("id") // รับ ID ของ CartItem (ไม่ใช่ BookID นะ)
+	itemID := c.Params("id") // รับ ID ของรายการในตะกร้า (CartItem ID)
 
+	// ลบโดยตรวจสอบว่าเป็นของเจ้าของ User จริงๆ เพื่อความปลอดภัย
 	result := database.DB.Where("id = ? AND user_id = ?", itemID, userID).Delete(&models.CartItem{})
-	
+
 	if result.RowsAffected == 0 {
-		return c.Status(404).JSON(fiber.Map{"error": "Item not found"})
+		return c.Status(404).JSON(fiber.Map{"error": "ไม่พบสินค้าในตะกร้า"})
 	}
 
-	return c.JSON(fiber.Map{"message": "Item removed"})
+	return c.JSON(fiber.Map{"message": "ลบสินค้าออกจากตะกร้าสำเร็จ"})
 }
