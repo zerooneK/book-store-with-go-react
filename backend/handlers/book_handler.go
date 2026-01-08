@@ -7,28 +7,28 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-// ฟังก์ชันสำหรับดึงหนังสือทั้งหมด
+// GetBooks: ดึงรายชื่อหนังสือทั้งหมดในระบบ
 func GetBooks(c *fiber.Ctx) error {
-	var books []models.Book
-	database.DB.Find(&books) // ใช้ DB จาก package database
-	return c.JSON(books)
+    var books []models.Book
+    if err := database.DB.Find(&books).Error; err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "ไม่สามารถดึงข้อมูลหนังสือได้"})
+    }
+    return c.JSON(books)
 }
 
-// ฟังก์ชันสำหรับเพิ่มหนังสือ
+// CreateBook: เพิ่มหนังสือเล่มใหม่เข้าไปในระบบ
 func CreateBook(c *fiber.Ctx) error {
-	book := new(models.Book)
-	// 1. แกะค่าจาก Body
-	if err := c.BodyParser(book); err != nil {
-		return c.Status(400).JSON(fiber.Map{"error": "Invalid input"})
-	}
-	// 2. บันทึกลงฐานข้อมูล และตรวจสอบ Error
-	if err := database.DB.Create(&book).Error; err != nil {
-		return c.Status(500).JSON(fiber.Map{"error": "Could not create book"})
-	}
-	// 3. ส่งข้อมูลหนังสือที่สร้างเสร็จกลับไป
-	return c.JSON(book)
+    book := new(models.Book)
+    // 1. รับข้อมูลจากหน้าบ้าน
+    if err := c.BodyParser(book); err != nil {
+        return c.Status(400).JSON(fiber.Map{"error": "ข้อมูลหนังสือไม่ถูกต้อง"})
+    }
+    // 2. บันทึกลงฐานข้อมูล
+    if err := database.DB.Create(&book).Error; err != nil {
+        return c.Status(500).JSON(fiber.Map{"error": "ไม่สามารถเพิ่มหนังสือได้"})
+    }
+    return c.JSON(book)
 }
-
 // ฟังก์ชันแก้ไขข้อมูลหนังสือ (PUT)
 func UpdateBook(c *fiber.Ctx) error {
 	// 1. รับ ID จาก URL (เช่น /book/1)
