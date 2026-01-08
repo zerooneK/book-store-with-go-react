@@ -8,27 +8,35 @@ import BookCard from './BookCard'
 import BookDetailModal from './BookDetailModal'
 import sectionIcon from './assets/Icon.png'
 
+// ที่อยู่หลักของ API
+const API_BASE_URL = 'http://localhost:3000'
+
 function App() {
   const navigate = useNavigate()
-  const [books, setBooks] = useState([])
+
+  // --- 1. การประกาศ State (จัดกลุ่มตามการใช้งาน) ---
+
+  // สถานะการเข้าสู่ระบบและข้อมูลผู้ใช้
   const [token, setToken] = useState(localStorage.getItem('token') || '')
   const [role, setRole] = useState(localStorage.getItem('role') || '')
   const [name, setName] = useState(localStorage.getItem('name') || '')
 
-  // ข้อมูลสำหรับจัดการหนังสือ (เพิ่ม/แก้ไข)
+  // ข้อมูลเกี่ยวกับหนังสือ
+  const [books, setBooks] = useState([])
   const [newBook, setNewBook] = useState({ title: '', author: '', description: '', price: 0, image_url: '', stock: 0 })
 
-  // สถานะการควบคุมหน้าต่าง Modal และโหมดการทำงาน
+  // การควบคุมหน้าต่าง Modal และการแสดงผล UI
   const [showAddModal, setShowAddModal] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [currentBookId, setCurrentBookId] = useState(null)
-  const [selectedBookForCart, setSelectedBookForCart] = useState(null);
+  const [selectedBookForCart, setSelectedBookForCart] = useState(null)
 
-  // ข้อมูลตะกร้าสินค้าและการแสดงผล
+  // ข้อมูลตะกร้าสินค้า
   const [cartItems, setCartItems] = useState([])
   const [showCart, setShowCart] = useState(false)
 
-  // โหลดข้อมูลเริ่มต้นและข้อมูลตะกร้าเมื่อเข้าสู่ระบบ
+  // --- 2. ผลกระทบย้อนกลับ (Side Effects) ---
+
   useEffect(() => {
     fetchBooks()
     if (token) {
@@ -36,17 +44,33 @@ function App() {
     }
   }, [token])
 
-  // ดึงรายการหนังสือทั้งหมดจาก API
+  // --- 3. การดึงข้อมูลจาก API ---
+
+  // ดึงรายการหนังสือทั้งหมด
   const fetchBooks = async () => {
     try {
-      const response = await axios.get('http://localhost:3000/books')
+      const response = await axios.get(`${API_BASE_URL}/books`)
       setBooks(response.data)
     } catch (error) {
       console.error("โหลดหนังสือไม่สำเร็จ", error)
     }
   }
 
-  // ออกจากระบบ ล้างค่าใน State และ LocalStorage
+  // ดึงข้อมูลในตะกร้าของสมาชิก
+  const fetchCart = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/cart`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setCartItems(response.data)
+    } catch (error) {
+      console.error("โหลดตะกร้าสินค้าไม่สำเร็จ:", error)
+    }
+  }
+
+  // --- 4. การจัดการระบบสมาชิก ---
+
+  // ออกจากระบบและล้างค่าข้อมูลทั้งหมด
   const handleLogout = () => {
     setToken('')
     setRole('')
@@ -64,7 +88,9 @@ function App() {
     })
   }
 
-  // เปิด Modal เพื่อเพิ่มหนังสือใหม่
+  // --- 5. การจัดการหนังสือสำหรับ Admin (หมายเหตุความปลอดภัย: Backend ต้องตรวจสอบสิทธิ์เสมอ) ---
+
+  // เปิดหน้าต่างเพิ่มหนังสือใหม่
   const openAddModal = () => {
     setIsEditing(false)
     setCurrentBookId(null)
@@ -72,7 +98,7 @@ function App() {
     setShowAddModal(true)
   }
 
-  // เปิด Modal พร้อมโหลดข้อมูลหนังสือเพื่อแก้ไข
+  // เปิดหน้าต่างแก้ไขข้อมูลหนังสือ
   const handleEditClick = (book) => {
     setIsEditing(true)
     setCurrentBookId(book.ID)
@@ -87,27 +113,29 @@ function App() {
     setShowAddModal(true)
   }
 
-  // ส่งข้อมูลหนังสือ (เพิ่มหรือแก้ไข) ไปยัง Backend
+  // บันทึกข้อมูลหนังสือ (ทั้งเพิ่มใหม่และแก้ไข)
   const handleSaveBook = async (e) => {
     e.preventDefault()
+    // ข้อควรระวัง: ฝั่ง Backend ต้องตรวจสอบ Token และ Role เพื่อความปลอดภัยสูงสุด
     try {
       const headers = { headers: { Authorization: `Bearer ${token}` } }
       if (isEditing) {
-        await axios.put(`http://localhost:3000/admin/book/${currentBookId}`, newBook, headers)
+        await axios.put(`${API_BASE_URL}/admin/book/${currentBookId}`, newBook, headers)
         Swal.fire({ icon: 'success', title: 'แก้ไขเรียบร้อย!', showConfirmButton: false, timer: 1500, background: '#1a1a2e', color: '#fff' })
       } else {
-        await axios.post('http://localhost:3000/admin/book', newBook, headers)
+        await axios.post(`${API_BASE_URL}/admin/book`, newBook, headers)
         Swal.fire({ icon: 'success', title: 'เพิ่มเรียบร้อย!', showConfirmButton: false, timer: 1500, background: '#1a1a2e', color: '#fff' })
       }
       fetchBooks()
       setShowAddModal(false)
     } catch (error) {
-      Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1a1a2e', color: '#fff' })
+      Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: error.message, background: '#1a1a2e', color: '#fff' })
     }
   }
 
-  // ลบหนังสือออกจากระบบ (เฉพาะ Admin)
+  // ลบหนังสือออกจากระบบ
   const handleDeleteBook = async (id) => {
+    // ข้อควรระวัง: ฝั่ง Backend ต้องตรวจสอบสิทธิ์ทุกครั้งก่อนดำเนินการลบ
     Swal.fire({
       title: 'แน่ใจนะว่าจะลบ?',
       text: "ลบแล้วกู้คืนไม่ได้นะ! 🗑️",
@@ -122,37 +150,36 @@ function App() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await axios.delete(`http://localhost:3000/admin/book/${id}`, {
+          await axios.delete(`${API_BASE_URL}/admin/book/${id}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
           Swal.fire({ title: 'ลบเรียบร้อย!', icon: 'success', background: '#1a1a2e', color: '#fff', confirmButtonColor: '#667eea' })
           fetchBooks()
         } catch (error) {
-          Swal.fire({ icon: 'error', title: 'Error', text: error.message, background: '#1a1a2e', color: '#fff' })
+          Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: error.message, background: '#1a1a2e', color: '#fff' })
         }
       }
     })
   }
 
-  // ดึงข้อมูลสินค้าในตะกร้าของผู้ใช้งาน
-  const fetchCart = async () => {
-    try {
-      const response = await axios.get('http://localhost:3000/api/cart', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      setCartItems(response.data)
-    } catch (error) {
-      console.error("Error fetching cart:", error)
-    }
-  }
+  // --- 6. การจัดการตะกร้าสินค้า ---
 
-  // เพิ่มหนังสือลงในตะกร้า
-  const handleAddToCart = async (bookId) => {
+  // เปิดดูรายละเอียดหนังสือเพื่อเตรียมเพิ่มลงตะกร้า
+  const openBookDetail = (bookId) => {
+    const book = books.find(b => b.ID === bookId);
+    if (book) {
+      setSelectedBookForCart(book);
+    }
+  };
+
+  // ยืนยันการเพิ่มหนังสือลงตะกร้า
+  const confirmAddToCart = async (bookId, quantity) => {
+    // กรณีเป็น Guest: แจ้งเตือนให้เข้าสู่ระบบก่อน
     if (!token) {
       Swal.fire({
         icon: 'warning',
         title: 'กรุณาเข้าสู่ระบบ',
-        text: 'ต้อง Login ก่อนถึงจะช้อปได้นะ! 🚀',
+        text: 'คุณต้องล็อกอินก่อนถึงจะหยิบของใส่ตะกร้าได้นะ 🚀',
         showCancelButton: true,
         confirmButtonText: '🔐 ไปหน้า Login',
         cancelButtonText: 'ยกเลิก',
@@ -166,73 +193,11 @@ function App() {
           navigate('/login')
         }
       });
-      return
-    }
-
-    try {
-      await axios.post('http://localhost:3000/api/cart',
-        { book_id: bookId, quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
-
-      const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 1500,
-        timerProgressBar: true,
-        background: '#4cd964',
-        color: '#fff'
-      })
-      Toast.fire({ icon: 'success', title: 'เพิ่มลงตะกร้าแล้ว!' })
-
-      fetchCart()
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.error || 'เพิ่มสินค้าไม่สำเร็จ',
-        background: '#1a1a2e',
-        color: '#fff'
-      })
-    }
-  }
-
-  // เปิด Modal รายละเอียดหนังสือ
-  const openBookDetail = (bookId) => {
-    const book = books.find(b => b.ID === bookId);
-    if (book) {
-      setSelectedBookForCart(book);
-    }
-  };
-
-  // ยืนยันการเพิ่มลงตะกร้า (จาก Modal)
-  const confirmAddToCart = async (bookId, quantity) => {
-    // เช็คว่าเป็น Guest หรือไม่ (ไม่มี Token)
-    if (!token) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'กรุณาเข้าสู่ระบบ',
-        text: 'คุณต้องล็อกอินก่อนถึงจะหยิบของใส่ตะกร้าได้นะ 🚀',
-        showCancelButton: true,
-        confirmButtonText: '🔐 ไปหน้า Login',
-        cancelButtonText: 'ยกเลิก',
-        confirmButtonColor: '#667eea', // สีม่วงตามธีม
-        cancelButtonColor: '#d33',
-        background: '#1a1a2e',
-        color: '#fff',
-        reverseButtons: true // สลับปุ่มให้ Login อยู่ขวา
-      }).then((result) => {
-        if (result.isConfirmed) {
-          // สั่งให้ React Router เปลี่ยนหน้าไป Login
-          navigate('/login')
-        }
-      });
       return;
     }
 
     try {
-      await axios.post('http://localhost:3000/api/cart',
+      await axios.post(`${API_BASE_URL}/api/cart`,
         { book_id: bookId, quantity: quantity },
         { headers: { Authorization: `Bearer ${token}` } }
       )
@@ -252,8 +217,8 @@ function App() {
     } catch (error) {
       Swal.fire({
         icon: 'error',
-        title: 'Error',
-        text: error.response?.data?.error || 'เกิดข้อผิดพลาด',
+        title: 'เกิดข้อผิดพลาด',
+        text: error.response?.data?.error || 'ไม่สามารถเพิ่มสินค้าได้',
         background: '#1a1a2e', color: '#fff'
       });
     }
@@ -262,7 +227,7 @@ function App() {
   // ลบสินค้าออกจากตะกร้า
   const handleRemoveFromCart = async (itemId) => {
     try {
-      await axios.delete(`http://localhost:3000/api/cart/${itemId}`, {
+      await axios.delete(`${API_BASE_URL}/api/cart/${itemId}`, {
         headers: { Authorization: `Bearer ${token}` }
       })
       fetchCart()
@@ -270,6 +235,8 @@ function App() {
       console.error("ลบสินค้าไม่สำเร็จ", error)
     }
   }
+
+  // --- 7. การแสดงผล UI (Render) ---
 
   return (
     <div>
@@ -310,7 +277,7 @@ function App() {
                 </>
               )}
 
-              {/* เฉพาะ Admin เท่านั้นที่เห็นปุ่มเพิ่มหนังสือ */}
+              {/* ปรับปรุง: เฉพาะ Admin เท่านั้นที่เห็นปุ่มเพิ่มหนังสือ */}
               {role === 'admin' && (
                 <button className="add-book-btn" onClick={openAddModal}>
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
@@ -381,7 +348,7 @@ function App() {
         </div>
       )}
 
-      {/* รายการหนังสือหลัก */}
+      {/* ส่วนแสดงรายการหนังสือหลัก */}
       <div className={`container ${!token ? 'guest-mode-center' : ''}`}>
         <div className="section-title">
           <h2><img src={sectionIcon} alt="icon" className="section-icon" />คลังหนังสือจักรวาล</h2>
