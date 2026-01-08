@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import Swal from 'sweetalert2'
 import Cart from './Cart'
@@ -9,6 +9,7 @@ import BookDetailModal from './BookDetailModal'
 import sectionIcon from './assets/Icon.png'
 
 function App() {
+  const navigate = useNavigate()
   const [books, setBooks] = useState([])
   const [token, setToken] = useState(localStorage.getItem('token') || '')
   const [role, setRole] = useState(localStorage.getItem('role') || '')
@@ -151,10 +152,20 @@ function App() {
       Swal.fire({
         icon: 'warning',
         title: 'กรุณาเข้าสู่ระบบ',
-        text: 'ต้อง Login ก่อนถึงจะช้อปได้นะ!',
+        text: 'ต้อง Login ก่อนถึงจะช้อปได้นะ! 🚀',
+        showCancelButton: true,
+        confirmButtonText: '🔐 ไปหน้า Login',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#667eea',
+        cancelButtonColor: '#d33',
         background: '#1a1a2e',
-        color: '#fff'
-      })
+        color: '#fff',
+        reverseButtons: true
+      }).then((result) => {
+        if (result.isConfirmed) {
+          navigate('/login')
+        }
+      });
       return
     }
 
@@ -197,8 +208,26 @@ function App() {
 
   // ยืนยันการเพิ่มลงตะกร้า (จาก Modal)
   const confirmAddToCart = async (bookId, quantity) => {
+    // เช็คว่าเป็น Guest หรือไม่ (ไม่มี Token)
     if (!token) {
-      Swal.fire({ icon: 'warning', title: 'กรุณาเข้าสู่ระบบก่อนนะครับ', background: '#1a1a2e', color: '#fff' });
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเข้าสู่ระบบ',
+        text: 'คุณต้องล็อกอินก่อนถึงจะหยิบของใส่ตะกร้าได้นะ 🚀',
+        showCancelButton: true,
+        confirmButtonText: '🔐 ไปหน้า Login',
+        cancelButtonText: 'ยกเลิก',
+        confirmButtonColor: '#667eea', // สีม่วงตามธีม
+        cancelButtonColor: '#d33',
+        background: '#1a1a2e',
+        color: '#fff',
+        reverseButtons: true // สลับปุ่มให้ Login อยู่ขวา
+      }).then((result) => {
+        if (result.isConfirmed) {
+          // สั่งให้ React Router เปลี่ยนหน้าไป Login
+          navigate('/login')
+        }
+      });
       return;
     }
 
