@@ -224,7 +224,35 @@ function App() {
     }
   };
 
-  // ลบสินค้าออกจากตะกร้า
+  // ลดจำนวนสินค้าในตะกร้า หรือลบออกถ้าเหลือ 1
+  const handleDecreaseItem = async (item) => {
+    try {
+      if (item.quantity > 1) {
+        // กรณีมากกว่า 1: ส่ง PUT ไปยัง /api/cart/:id เพื่ออัปเดตจำนวนสินค้า
+        await axios.put(`${API_BASE_URL}/api/cart/${item.ID}`,
+          { quantity: item.quantity - 1 },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+      } else {
+        // กรณีเหลือ 1: ลบรายการนี้ออกจากตะกร้า
+        await axios.delete(`${API_BASE_URL}/api/cart/${item.ID}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      }
+      fetchCart()
+    } catch (error) {
+      console.error("ลดจำนวนสินค้าไม่สำเร็จ", error)
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด',
+        text: 'ไม่สามารถปรับปรุงจำนวนสินค้าได้',
+        background: '#1a1a2e',
+        color: '#fff'
+      })
+    }
+  }
+
+  // ลบสินค้าออกจากตะกร้า (รองรับกรณีต้องการลบทิ้งทันที)
   const handleRemoveFromCart = async (itemId) => {
     try {
       await axios.delete(`${API_BASE_URL}/api/cart/${itemId}`, {
@@ -299,7 +327,7 @@ function App() {
         <Cart
           cartItems={cartItems}
           onClose={() => setShowCart(false)}
-          onRemove={handleRemoveFromCart}
+          onDecrease={handleDecreaseItem}
         />
       )}
 

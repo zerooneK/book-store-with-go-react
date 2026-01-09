@@ -3,7 +3,7 @@ import React from 'react';
 import Swal from 'sweetalert2';
 import './Cart.css'; // ปรับมาใช้ CSS เฉพาะส่วนของตะกร้า
 
-const Cart = ({ cartItems, onClose, onRemove }) => {
+const Cart = ({ cartItems, onClose, onDecrease }) => {
   // คำนวณราคารวมทั้งหมดในตะกร้า
   const totalPrice = cartItems.reduce((sum, item) => sum + ((item.book?.price || 0) * item.quantity), 0);
 
@@ -59,9 +59,10 @@ const Cart = ({ cartItems, onClose, onRemove }) => {
                 {/* ปุ่มลบสินค้าออกจากตะกร้า */}
                 <button
                   className="btn-danger-sm"
-                  onClick={() => onRemove(item.ID)}
+                  onClick={() => onDecrease(item)}
+                  title="ลดจำนวนสินค้า"
                 >
-                  ลบ
+                  −
                 </button>
               </div>
             ))

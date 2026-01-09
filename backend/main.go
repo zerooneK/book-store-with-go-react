@@ -71,6 +71,7 @@ func main() {
 	userApi := app.Group("/api", jwtMiddleware)
 	userApi.Post("/cart", handlers.AddToCart)
 	userApi.Get("/cart", handlers.GetCart)
+	userApi.Put("/cart/:id", handlers.UpdateCartItem)
 	userApi.Delete("/cart/:id", handlers.DeleteCartItem)
 
 	// 6. รันเซิร์ฟเวอร์ตามพอร์ตที่กำหนด

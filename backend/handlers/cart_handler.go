@@ -92,3 +92,40 @@ func DeleteCartItem(c *fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{"message": "ลบสินค้าออกจากตะกร้าสำเร็จ"})
 }
+
+// UpdateCartItem: อัปเดตจำนวนสินค้าในตะกร้า (กำหนดค่าทับลงไปเลย)
+func UpdateCartItem(c *fiber.Ctx) error {
+	userID := getUserID(c)
+	itemID := c.Params("id") // รับ ID ของรายการในตะกร้า (CartItem ID)
+
+	type UpdateInput struct {
+		Quantity int `json:"quantity"`
+	}
+	input := new(UpdateInput)
+	if err := c.BodyParser(input); err != nil {
+		return c.Status(400).JSON(fiber.Map{"error": "ข้อมูลที่ส่งมาไม่ถูกต้อง"})
+	}
+
+	if input.Quantity <= 0 {
+		return c.Status(400).JSON(fiber.Map{"error": "จำนวนสินค้าต้องมากกว่า 0"})
+	}
+
+	var cartItem models.CartItem
+	// ค้นหาด้วย ID ของรายการเอง จะแม่นยำกว่า
+	result := database.DB.Where("id = ? AND user_id = ?", itemID, userID).First(&cartItem)
+
+	if result.Error != nil {
+		return c.Status(404).JSON(fiber.Map{"error": "ไม่พบสินค้าในตะกร้า"})
+	}
+
+	// อัปเดตจำนวนเป็นค่าใหม่ที่ส่งมา
+	cartItem.Quantity = input.Quantity
+	if err := database.DB.Save(&cartItem).Error; err != nil {
+		return c.Status(500).JSON(fiber.Map{"error": "ไม่สามารถบันทึกข้อมูลได้"})
+	}
+
+	return c.JSON(fiber.Map{
+		"message":  "อัปเดตจำนวนสินค้าสำเร็จ",
+		"quantity": cartItem.Quantity,
+	})
+}
