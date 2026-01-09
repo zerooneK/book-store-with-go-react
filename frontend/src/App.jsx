@@ -257,7 +257,10 @@ function App() {
 
         <div className="nav-actions">
           {!token ? (
-            <Link to="/login" className="btn-primary">🔐 Login</Link>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <Link to="/login" className="btn-primary">🔐 Login</Link>
+              <Link to="/register" className="btn-secondary">📝 Register</Link>
+            </div>
           ) : (
             <>
               {role === 'admin' ? (
@@ -351,8 +354,8 @@ function App() {
       {/* ส่วนแสดงรายการหนังสือหลัก */}
       <div className={`container ${!token ? 'guest-mode-center' : ''}`}>
         <div className="section-title">
-          <h2><img src={sectionIcon} alt="icon" className="section-icon" />คลังหนังสือจักรวาล</h2>
-          <p>สำรวจหนังสือน่าอ่านจากทั่วทุกมุมกาแล็กซี่</p>
+          <h2><img src={sectionIcon} alt="icon" className="section-icon" />ร้านหนังสือของจักรวาล</h2>
+          <p>สำรวจหนังสือน่าอ่านจากทั่วทุกมุมของกาแล็กซี่</p>
         </div>
 
         <div className="book-grid">
